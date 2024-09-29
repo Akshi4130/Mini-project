@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Advanced Diet Analyzer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #eae71d, #ef1010);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      background-color: #fff;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+      max-width: 400px;
+      width: 100%;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    p {
+      text-align: center;
+      color: #777;
+      margin-bottom: 30px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      color: #444;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #007bff;
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    #result {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 1.1em;
+      color: #333;
+    }
+
+    #downloadBtn {
+      margin-top: 10px;
+      background-color: #28a745;
+      color: white;
+    }
+
+    #downloadBtn:hover {
+      background-color: #218838;
+    }
+  </style>
+</head>
+<body>
+    <div class="container">
+      <h1>Advanced Healthcare Diet Analyzer</h1>
+      <p>Get a comprehensive analysis of your diet and health</p>
+  
+      <form id="dietForm">
+        <label for="age">Age:</label>
+        <input type="number" id="age" name="age" required>
+  
+        <label for="height">Height (cm):</label>
+        <input type="number" id="height" name="height" required>
+  
+        <label for="weight">Weight (kg):</label>
+        <input type="number" id="weight" name="weight" required>
+  
+        <label for="dailyCalories">Daily Calories (kcal):</label>
+        <input type="number" id="dailyCalories" name="dailyCalories" required>
+  
+        <label for="activityLevel">Activity Level:</label>
+        <select id="activityLevel" name="activityLevel" required>
+          <option value="sedentary">Sedentary</option>
+          <option value="moderate">Moderate</option>
+          <option value="active">Active</option>
+        </select>
+  
+        <label for="dietType">Diet Type:</label>
+        <select id="dietType" name="dietType" required>
+            <option value="balanced">Balanced</option>
+            <option value="vegetarian">Vegetarian</option>
+            <option value="vegan">Vegan</option>
+            <option value="highProtein">High Protein</option>
+          </select>
+    
+          <label for="goal">Your Goal:</label>
+          <select id="goal" name="goal" required>
+            <option value="maintain">Maintain Weight</option>
+            <option value="lose">Lose Weight</option>
+            <option value="gain">Gain Muscle</option>
+          </select>
+    
+          <button type="submit">Analyze Diet</button>
+        </form>
+    
+        <div id="result"></div>
+    
+        <button id="downloadBtn" style="display:none;">Download Report as PDF</button>
+      </div>
+      <script>
+        document.getElementById("dietForm").addEventListener("submit", function(event) {
+          event.preventDefault();
+    
+          // Get form values
+          const age = document.getElementById("age").value;
+          const height = document.getElementById("height").value;
+          const weight = document.getElementById("weight").value;
+          const activityLevel = document.getElementById("activityLevel").value;
+          const dailyCalories = document.getElementById("dailyCalories").value;
+          const goal = document.getElementById("goal").value;
+    
+          // Calculate BMI
+          const heightInMeters = height / 100;
+          const bmi = (weight / (heightInMeters * heightInMeters)).toFixed(1);
+    
+          // Calorie Recommendation based on activity level
+          let calorieRecommendation;
+          if (activityLevel === "sedentary") {
+            calorieRecommendation = (dailyCalories * 1.2).toFixed(0);
+          } else if (activityLevel === "moderate") {
+            calorieRecommendation = (dailyCalories * 1.55).toFixed(0);
+          } else if (activityLevel === "active") {
+            calorieRecommendation = (dailyCalories * 1.75).toFixed(0);
+          }
+    
+          let goalMessage;
+      if (goal === "maintain") {
+        goalMessage = "You're aiming to maintain your current weight.";
+      } else if (goal === "lose") {
+        goalMessage = "You're aiming to lose weight. A deficit of around 500 kcal is ideal.";
+      } else if (goal === "gain") {
+        goalMessage = "You're aiming to gain muscle. A surplus of around 300-500 kcal will help.";
+      }
+
+      // Display result
+      const resultHTML = `
+        <p><strong>Body Mass Index (BMI):</strong> ${bmi}</p>
+        <p><strong>Recommended Daily Calories:</strong> ${calorieRecommendation} kcal</p>
+        <p>${goalMessage}</p>
+      `;
+      document.getElementById("result").innerHTML = resultHTML;
+      
+      // Show download button after result is displayed
+      document.getElementById("downloadBtn").style.display = "block";
+    });
+
+    document.getElementById("downloadBtn").addEventListener("click", function() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      const resultContent = document.getElementById("result").innerText;
+
+      doc.text("Advanced Diet Analyzer Report", 10, 10);
+      doc.text(resultContent, 10, 20);
+      
+      doc.save("diet_analysis_report.pdf");
+    });
+  </script>
+</body>
+
+</html>    
+    
